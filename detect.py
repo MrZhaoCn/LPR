@@ -7,7 +7,7 @@ Created on Tue Oct 16 22:13:54 2018
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-imagePath = "./images/苏A20Q03.jpg"
+imagePath = "./change_size/2.jpg"
 img = cv2.imread(imagePath)
 
 #China car plate size: 440mm*140mm，aspect 3.142857
@@ -54,7 +54,7 @@ sobel = cv2.addWeighted(absX,0.5,absY,0.5,0)
 #二值化
 ret,binary = cv2.threshold(sobel,0,255,cv2.THRESH_BINARY + cv2.THRESH_OTSU )
 
-kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(17,3))
+kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(20,3))
 
 colose = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)  # 闭运算
 
@@ -64,12 +64,12 @@ userfulContours = []
 Box = []
 for contour in contours: 
     userful,rect = isUsefulContour(contour)
-    #box = np.int0(cv2.boxPoints(rect))
-    #Box.append(box)
+    box = np.int0(cv2.boxPoints(rect))
+    Box.append(box)
     if userful:
         userfulContours.append(contour)
-        box = np.int0(cv2.boxPoints(rect))
-        Box.append(box)
+        #box = np.int0(cv2.boxPoints(rect))
+        #Box.append(box)
         
 imag = cv2.drawContours(img.copy(),Box,-1,(0,0,255),1)
 cv2.imshow("imag",imag)
