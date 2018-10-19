@@ -7,6 +7,7 @@ Created on Tue Oct 16 22:13:54 2018
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+
 imagePath = "./change_size/344.jpg"
 #China car plate size: 440mm*140mm，aspect 3.142857 136,36
 aspect = 3.142857
