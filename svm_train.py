@@ -79,8 +79,7 @@ def train():
     joblib.dump(classifier, './save/svm.pkl')
     
 if __name__ == "__main__":
-    getCarPlateImages()
-    #train()
+    train()
     #读取Model
 # =============================================================================
 #     clf3 = joblib.load('save/svm.pkl')
