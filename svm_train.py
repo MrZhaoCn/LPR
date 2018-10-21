@@ -10,9 +10,11 @@ import numpy as np
 import cv2
 import os
 import random
-from sklearn import svm
+from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 from sklearn.externals import joblib #jbolib模块
 carPlateImagePath = "./cropImagesTemp/"
 carPlateWidth = 136
@@ -22,7 +24,7 @@ def save_to_file(file_name, contents):
     fh = open(file_name, 'w')
     fh.write(contents)
     fh.close()
-    
+#
 def getCarPlateImages():
      image_list = os.listdir(carPlateImagePath)
      #将数据打乱有利于测试准确率
@@ -30,7 +32,7 @@ def getCarPlateImages():
      images = []
      labels = []
      file_label = ""
-     i = 0
+     files = []
      for file in image_list:
         filePath = carPlateImagePath+file
         image_soure = cv2.imread(filePath)
@@ -39,11 +41,12 @@ def getCarPlateImages():
         if image_soure.any() == False:
             continue
         try:
+            #image_soure = cv2.cvtColor(image_soure,cv2.COLOR_BGR2GRAY)
             images.append(image_soure)
+            files.append(file)
             if "no" in file:
                 file_label = file_label + file + "0  \n"
                 labels.append(0)
-                i = i + 1
             else:
                 file_label = file_label +  file + "1  \n"
                 labels.append(1)
@@ -57,23 +60,32 @@ def getCarPlateImages():
      
      #将名称和对应的label写入文件
      save_to_file("fileLabels",file_label)
-     print(i)
-     return data,npLabels,image_list
+     print(data.shape)
+     return data,npLabels,files
 
 def train():
-    data,labels,image_list = getCarPlateImages()
-    
-# =============================================================================
-#     print(image_list[2000:2010])
-#     print(labels[2000:2010])
-# =============================================================================
-    
+    data,labels,files = getCarPlateImages()
+
+    n_components = 700
+    param_grid = {'C': [1e3, 5e3, 1e4, 5e4, 1e5],
+              'gamma': [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1], }
     
     x_train, x_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, random_state=42)
-    classifier = svm.SVC(gamma=0.001)#默认是rbf
-    classifier.fit(x_train,y_train)
-    print (u"训练集准确率:%.2f%%" % (classifier.score(x_train, y_train) * 100))
-    print (u"测试集准确率:%.2f%%" % (classifier.score(x_test, y_test) * 100))
+    
+    #降维，除了使用PCA外，还有一种思路是利用CNN抽取特征做分类
+    pca = PCA(n_components=n_components, svd_solver='randomized',
+          whiten=True).fit(x_train)
+    x_train_pca = pca.transform(x_train)
+    x_test_pca = pca.transform(x_test)
+    
+    #通过网格交叉验证，最优参数为{'C': 1000.0, 'gamma': 0.001}，准确率分贝为：训练集准确率:100.00%
+     #测试集准确率:97.54%
+    #classifier = GridSearchCV(SVC(kernel='rbf', class_weight='balanced'), param_grid)
+    classifier = SVC(C=1000.0,gamma=0.001,kernel='rbf', class_weight='balanced')#默认是rbf
+    classifier.fit(x_train_pca, y_train)
+    
+    print (u"训练集准确率:%.2f%%" % (classifier.score(x_train_pca, y_train) * 100))
+    print (u"测试集准确率:%.2f%%" % (classifier.score(x_test_pca, y_test) * 100))
     
     #保存Model(注:save文件夹要预先建立，否则会报错)
     joblib.dump(classifier, './save/svm.pkl')
