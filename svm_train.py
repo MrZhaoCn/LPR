@@ -10,23 +10,27 @@ import numpy as np
 import cv2
 import os
 import random
+import detect
+import imageUtil
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.externals import joblib #jbolib模块
-carPlateImagePath = "./cropImagesTemp/"
+carPlateImagePath = "./testCropImagesTemp/"
+imagePath = "./images/湘G60009.jpg"
 carPlateWidth = 136
 carPlateHeight = 36
+n_components = 700
 
 def save_to_file(file_name, contents):
     fh = open(file_name, 'w')
     fh.write(contents)
     fh.close()
 #
-def getCarPlateImages():
-     image_list = os.listdir(carPlateImagePath)
+def getCarPlateImages(path):
+     image_list = os.listdir(path)
      #将数据打乱有利于测试准确率
      random.shuffle(image_list)
      images = []
@@ -34,7 +38,7 @@ def getCarPlateImages():
      file_label = ""
      files = []
      for file in image_list:
-        filePath = carPlateImagePath+file
+        filePath = path+file
         image_soure = cv2.imread(filePath)
         if image_soure is None:
             continue
@@ -64,9 +68,7 @@ def getCarPlateImages():
      return data,npLabels,files
 
 def train():
-    data,labels,files = getCarPlateImages()
-
-    n_components = 700
+    data,labels,files = getCarPlateImages(carPlateImagePath)
     param_grid = {'C': [1e3, 5e3, 1e4, 5e4, 1e5],
               'gamma': [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1], }
     
@@ -89,14 +91,30 @@ def train():
     
     #保存Model(注:save文件夹要预先建立，否则会报错)
     joblib.dump(classifier, './save/svm.pkl')
+def dimensionalityPCA(n_components,x_predict):
+    #降维，除了使用PCA外，还有一种思路是利用CNN抽取特征做分类
+    pca = PCA(n_components=700, svd_solver='randomized',
+          whiten=True).fit(x_predict)
+    x_predict_pca = pca.transform(x_predict)
+    return x_predict_pca
+def predict(clf3): 
+    #cropImages = detect.detectCarPlate(imagePath)
     
+    #resizeImage = imageUtil.resizeCarPlateImage()
+    data,labels,_ = getCarPlateImages(carPlateImagePath)
+    #降维，除了使用PCA外，还有一种思路是利用CNN抽取特征做分类
+    x_train_pca = dimensionalityPCA(700,data)
+    predicted = clf3.predict(x_train_pca)
+    return predicted,labels
+     
 if __name__ == "__main__":
-    train()
+    #train()
+
     #读取Model
-# =============================================================================
-#     clf3 = joblib.load('save/svm.pkl')
-#     if clf3:
-#         predicted = clf3.predict(x_test)
-#     else:
-# =============================================================================
-        
+    clf3 = joblib.load('save/svm.pkl')
+    if clf3:
+         predicted,labels = predict(clf3)
+         print(predicted[:20])
+         print(labels[:20])
+    else:
+        train()

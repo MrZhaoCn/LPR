@@ -14,8 +14,8 @@ image_size = 900
 source_path = "./images/"
 target_path = "./change_size/"
 
-carPlateImagePath = "./cropImages/"
-targetCarPlateImage = "./cropImagesTemp/"
+carPlateImagePath = "./testCropImages/"
+targetCarPlateImage = "./testCropImagesTemp/"
 carPlateWidth = 136
 carPlateHeight = 36
 
@@ -58,7 +58,15 @@ def resizeCarPlateImage():
         except:
             print(tartgetFilePath)
             
-           
+def resizeCarPlateImages(images): 
+    resizeImages = []
+    for image in images:
+        try:
+            image_soure = cv2.resize(image,(carPlateWidth,carPlateHeight),0,0,cv2.INTER_LINEAR)
+            resizeImages.append(image_soure)
+        except:
+            print("resizeImageError")      
+    return resizeImages
             
 def detectCarPlates():
     image_list = os.listdir(target_path)
