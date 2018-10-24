@@ -207,7 +207,7 @@ class GenPlate:
 
 G = GenPlate("./font/platech.ttf",'./font/platechar.ttf',"./NoPlates")
 
-G.genBatch(20000,2,range(31,65),"./generatePlate/",(136,36)) #注释原因为每次其他模块运行，若导入该库，都会刷性该函数
+G.genBatch(200,2,range(31,65),"./generatePlate/",(136,36)) #注释原因为每次其他模块运行，若导入该库，都会刷性该函数
 
 
 # cv2.imshow("a",com)
