@@ -10,27 +10,26 @@ import tensorflow as tf
 import numpy as np
 
 def interface(images,keep_prob):
-    print("interface")
     with tf.variable_scope("conv1") as scope:
-       weights = tf.get_variable('weights',
+        weights = tf.get_variable('weights',
                                   shape = [3,3,3,32],
                                   dtype = tf.float32,
                                   initializer=tf.truncated_normal_initializer(stddev=0.1,dtype=tf.float32))
        
         conv = tf.nn.conv2d(images,weights,strides = [1,1,1,1],padding='VALID')
-        biases = tf.get_variable（"biases",shape=[32],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
-        pre_activation = tf.nn.bias_add(conv + biases)
+        biases = tf.get_variable("biases",shape=[32],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
+        pre_activation = tf.nn.bias_add(conv, biases)
         conv1 = tf.nn.relu(pre_activation,name= scope.name)
         
     with tf.variable_scope("conv2") as scope:
-       weights = tf.get_variable('weights',
+        weights = tf.get_variable('weights',
                                   shape = [3,3,32,32],
                                   dtype = tf.float32,
                                   initializer=tf.truncated_normal_initializer(stddev=0.1,dtype=tf.float32))
        
         conv = tf.nn.conv2d(conv1,weights,strides = [1,1,1,1],padding='VALID')
-        biases = tf.get_variable（"biases",shape=[32],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
-        pre_activation = tf.nn.bias_add(conv + biases)
+        biases = tf.get_variable("biases",shape=[32],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
+        pre_activation = tf.nn.bias_add(conv, biases)
         conv2 = tf.nn.relu(pre_activation,name= scope.name)
         
     with tf.variable_scope("max_pooling1") as scope:
@@ -43,8 +42,8 @@ def interface(images,keep_prob):
                                   initializer=tf.truncated_normal_initializer(stddev=0.1,dtype=tf.float32))
        
         conv = tf.nn.conv2d(pool1,weights,strides = [1,1,1,1],padding='VALID')
-        biases = tf.get_variable（"biases",shape=[32],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
-        pre_activation = tf.nn.bias_add(conv + biases)
+        biases = tf.get_variable("biases",shape=[64],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
+        pre_activation = tf.nn.bias_add(conv, biases)
         conv3 = tf.nn.relu(pre_activation,name= scope.name)
         
     with tf.variable_scope("conv4") as scope:
@@ -54,8 +53,8 @@ def interface(images,keep_prob):
                                   initializer=tf.truncated_normal_initializer(stddev=0.1,dtype=tf.float32))
        
         conv = tf.nn.conv2d(conv3,weights,strides = [1,1,1,1],padding='VALID')
-        biases = tf.get_variable（"biases",shape=[32],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
-        pre_activation = tf.nn.bias_add(conv + biases)
+        biases = tf.get_variable("biases",shape=[64],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
+        pre_activation = tf.nn.bias_add(conv, biases)
         conv4 = tf.nn.relu(pre_activation,name= scope.name)
         
     with tf.variable_scope("max_pooling2") as scope:
@@ -68,8 +67,8 @@ def interface(images,keep_prob):
                                   initializer=tf.truncated_normal_initializer(stddev=0.1,dtype=tf.float32))
        
         conv = tf.nn.conv2d(pool2,weights,strides = [1,1,1,1],padding='VALID')
-        biases = tf.get_variable（"biases",shape=[32],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
-        pre_activation = tf.nn.bias_add(conv + biases)
+        biases = tf.get_variable("biases",shape=[128],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
+        pre_activation = tf.nn.bias_add(conv, biases)
         conv5 = tf.nn.relu(pre_activation,name= scope.name)
         
     with tf.variable_scope("conv6") as scope:
@@ -79,8 +78,8 @@ def interface(images,keep_prob):
                                   initializer=tf.truncated_normal_initializer(stddev=0.1,dtype=tf.float32))
        
         conv = tf.nn.conv2d(conv5,weights,strides = [1,1,1,1],padding='VALID')
-        biases = tf.get_variable（"biases",shape=[32],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
-        pre_activation = tf.nn.bias_add(conv + biases)
+        biases = tf.get_variable("biases",shape=[128],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
+        pre_activation = tf.nn.bias_add(conv, biases)
         conv6 = tf.nn.relu(pre_activation,name= scope.name)
         
     
@@ -90,7 +89,7 @@ def interface(images,keep_prob):
          
     with tf.variable_scope("fc1") as scope:
         shape = pool3.get_shape()
-        flattened_shape =shp[1].value*shp[2].value*shp[3].value
+        flattened_shape =shape[1].value*shape[2].value*shape[3].value
         reshape = tf.reshape(pool3,[-1,flattened_shape])
         fc1 = tf.nn.dropout(reshape,keep_prob,name='fc1_dropdot')
         
@@ -99,14 +98,14 @@ def interface(images,keep_prob):
                                   shape = [flattened_shape,65],
                                   dtype = tf.float32,
                                   initializer=tf.truncated_normal_initializer(stddev=0.005,dtype=tf.float32))
-        biases = tf.get_variable（"biases",shape=[65],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
+        biases = tf.get_variable("biases",shape=[65],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
         fc21 = tf.matmul(fc1,weights)+biases
     with tf.variable_scope("fc22") as scope:
         weights = weights = tf.get_variable('weights',
                                   shape = [flattened_shape,65],
                                   dtype = tf.float32,
                                   initializer=tf.truncated_normal_initializer(stddev=0.005,dtype=tf.float32))
-        biases = tf.get_variable（"biases",shape=[65],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
+        biases = tf.get_variable("biases",shape=[65],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
         fc22 = tf.matmul(fc1,weights)+biases
     
     with tf.variable_scope("fc23") as scope:
@@ -114,7 +113,7 @@ def interface(images,keep_prob):
                                   shape = [flattened_shape,65],
                                   dtype = tf.float32,
                                   initializer=tf.truncated_normal_initializer(stddev=0.005,dtype=tf.float32))
-        biases = tf.get_variable（"biases",shape=[65],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
+        biases = tf.get_variable("biases",shape=[65],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
         fc23 = tf.matmul(fc1,weights)+biases
         
     with tf.variable_scope("fc24") as scope:
@@ -122,7 +121,7 @@ def interface(images,keep_prob):
                                   shape = [flattened_shape,65],
                                   dtype = tf.float32,
                                   initializer=tf.truncated_normal_initializer(stddev=0.005,dtype=tf.float32))
-        biases = tf.get_variable（"biases",shape=[65],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
+        biases = tf.get_variable("biases",shape=[65],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
         fc24 = tf.matmul(fc1,weights)+biases
         
     with tf.variable_scope("fc25") as scope:
@@ -130,7 +129,7 @@ def interface(images,keep_prob):
                                   shape = [flattened_shape,65],
                                   dtype = tf.float32,
                                   initializer=tf.truncated_normal_initializer(stddev=0.005,dtype=tf.float32))
-        biases = tf.get_variable（"biases",shape=[65],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
+        biases = tf.get_variable("biases",shape=[65],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
         fc25 = tf.matmul(fc1,weights)+biases
         
     with tf.variable_scope("fc26") as scope:
@@ -138,7 +137,7 @@ def interface(images,keep_prob):
                                   shape = [flattened_shape,65],
                                   dtype = tf.float32,
                                   initializer=tf.truncated_normal_initializer(stddev=0.005,dtype=tf.float32))
-        biases = tf.get_variable（"biases",shape=[65],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
+        biases = tf.get_variable("biases",shape=[65],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
         fc26 = tf.matmul(fc1,weights)+biases
         
     with tf.variable_scope("fc27") as scope:
@@ -146,13 +145,12 @@ def interface(images,keep_prob):
                                   shape = [flattened_shape,65],
                                   dtype = tf.float32,
                                   initializer=tf.truncated_normal_initializer(stddev=0.005,dtype=tf.float32))
-        biases = tf.get_variable（"biases",shape=[65],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
+        biases = tf.get_variable("biases",shape=[65],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
         fc27 = tf.matmul(fc1,weights)+biases
         
-   return fc21,fc22,fc23,fc24,fc25,fc26,fc27    #shape = [7,batch_size,65] 
+    return fc21, fc22, fc23, fc24, fc25, fc26, fc27    #shape = [7,batch_size,65]
 
 def losses(logits1,logits2,logits3,logits4,logits5,logits6,logits7,labels):
-    print("losses")
     labels = tf.convert_to_tensor(labels,tf.int32)
     with tf.variable_scope("loss1") as scope:
          cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits1, labels=labels[:,0], name='xentropy_per_example')
@@ -197,7 +195,6 @@ def losses(logits1,logits2,logits3,logits4,logits5,logits6,logits7,labels):
     return loss1,loss2,loss3,loss4,loss5,loss6,loss7
 
 def trainning( loss1,loss2,loss3,loss4,loss5,loss6,loss7, learning_rate):
-    print("trainning")
     '''Training ops, the Op returned by this function is what must be passed to 'sess.run()' call to cause the model to train. Args: loss: loss tensor, from losses() Returns: train_op: The op for trainning '''
     with tf.name_scope('optimizer1'):
         optimizer1 = tf.train.AdamOptimizer(learning_rate= learning_rate)
