@@ -30,7 +30,7 @@ def interface(images,keep_prob):
         conv = tf.nn.conv2d(conv1,weights,strides = [1,1,1,1],padding='VALID')
         biases = tf.get_variable("biases",shape=[32],dtype = tf.float32,initializer=tf.constant_initializer(0.1))
         pre_activation = tf.nn.bias_add(conv, biases)
-        conv2 = tf.nn.relu(pre_activation,name= scope.name)
+        conv2 = tf.nn.relu(pre_activation,name = scope.name)
         
     with tf.variable_scope("max_pooling1") as scope:
         pool1 = tf.nn.max_pool(conv2,ksize=[1,2,2,1],strides=[1,2,2,1],padding='VALID',name='pooling1')
@@ -89,6 +89,7 @@ def interface(images,keep_prob):
          
     with tf.variable_scope("fc1") as scope:
         shape = pool3.get_shape()
+        print("pool3--------->",shape)
         flattened_shape =shape[1].value*shape[2].value*shape[3].value
         reshape = tf.reshape(pool3,[-1,flattened_shape])
         fc1 = tf.nn.dropout(reshape,keep_prob,name='fc1_dropdot')
@@ -158,70 +159,66 @@ def losses(logits1,logits2,logits3,logits4,logits5,logits6,logits7,labels):
          tf.summary.scalar(scope.name+'/loss1', loss1)
     with tf.variable_scope('loss2') as scope:
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits2, labels=labels[:,1], name='xentropy_per_example')
-        #cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels=labels,name='xentropy_per_example')
         loss2 = tf.reduce_mean(cross_entropy, name='loss2')
         tf.summary.scalar(scope.name+'/loss2', loss2)   
 
     with tf.variable_scope('loss3') as scope:
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits3, labels=labels[:,2], name='xentropy_per_example')
-        #cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels=labels,name='xentropy_per_example')
         loss3 = tf.reduce_mean(cross_entropy, name='loss3')
         tf.summary.scalar(scope.name+'/loss3', loss3)
 
     with tf.variable_scope('loss4') as scope:
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits4, labels=labels[:,3], name='xentropy_per_example')
-        #cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels=labels,name='xentropy_per_example')
         loss4 = tf.reduce_mean(cross_entropy, name='loss4')
         tf.summary.scalar(scope.name+'/loss4', loss4)
 
     with tf.variable_scope('loss5') as scope:
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits5, labels=labels[:,4], name='xentropy_per_example')
-        #cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels=labels,name='xentropy_per_example')
         loss5 = tf.reduce_mean(cross_entropy, name='loss5')
         tf.summary.scalar(scope.name+'/loss5', loss5)
 
     with tf.variable_scope('loss6') as scope:
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits6, labels=labels[:,5], name='xentropy_per_example')
-        #cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels=labels,name='xentropy_per_example')
         loss6 = tf.reduce_mean(cross_entropy, name='loss6')
         tf.summary.scalar(scope.name+'/loss6', loss6)
 
     with tf.variable_scope('loss7') as scope:
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits7, labels=labels[:,6], name='xentropy_per_example')
-        #cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels=labels,name='xentropy_per_example')
         loss7 = tf.reduce_mean(cross_entropy, name='loss7')
         tf.summary.scalar(scope.name+'/loss7', loss7)
 
     return loss1,loss2,loss3,loss4,loss5,loss6,loss7
 
-def trainning( loss1,loss2,loss3,loss4,loss5,loss6,loss7, learning_rate):
+def trainning( loss1,loss2,loss3,loss4,loss5,loss6,loss7, learning_rate,decay_rate_one,decay_rate_two):
     '''Training ops, the Op returned by this function is what must be passed to 'sess.run()' call to cause the model to train. Args: loss: loss tensor, from losses() Returns: train_op: The op for trainning '''
     with tf.name_scope('optimizer1'):
-        optimizer1 = tf.train.AdamOptimizer(learning_rate= learning_rate)
+        optimizer1 = tf.train.AdamOptimizer(learning_rate=learning_rate, beta1=decay_rate_one, beta2=decay_rate_two)
         global_step = tf.Variable(0, name='global_step', trainable=False)
-        train_op1 = optimizer1.minimize(loss1, global_step= global_step)
+        train_op1 = optimizer1.minimize(loss1, global_step=global_step)
+        print("optimizer1----------->",global_step)
     with tf.name_scope('optimizer2'):
-        optimizer2 = tf.train.AdamOptimizer(learning_rate= learning_rate)
+        optimizer2 = tf.train.AdamOptimizer(learning_rate=learning_rate, beta1=decay_rate_one, beta2=decay_rate_two)
         global_step = tf.Variable(0, name='global_step', trainable=False)
-        train_op2 = optimizer2.minimize(loss2, global_step= global_step) 
+        train_op2 = optimizer2.minimize(loss2, global_step= global_step)
+        print("optimizer2----------->", global_step)
     with tf.name_scope('optimizer3'):
-        optimizer3 = tf.train.AdamOptimizer(learning_rate= learning_rate)
+        optimizer3 = tf.train.AdamOptimizer(learning_rate= learning_rate, beta1=decay_rate_one, beta2=decay_rate_two)
         global_step = tf.Variable(0, name='global_step', trainable=False)
         train_op3 = optimizer3.minimize(loss3, global_step= global_step) 
     with tf.name_scope('optimizer4'):
-        optimizer4 = tf.train.AdamOptimizer(learning_rate= learning_rate)
+        optimizer4 = tf.train.AdamOptimizer(learning_rate= learning_rate, beta1=decay_rate_one, beta2=decay_rate_two)
         global_step = tf.Variable(0, name='global_step', trainable=False)
         train_op4 = optimizer4.minimize(loss4, global_step= global_step) 
     with tf.name_scope('optimizer5'):
-        optimizer5 = tf.train.AdamOptimizer(learning_rate= learning_rate)
+        optimizer5 = tf.train.AdamOptimizer(learning_rate= learning_rate, beta1=decay_rate_one, beta2=decay_rate_two)
         global_step = tf.Variable(0, name='global_step', trainable=False)
         train_op5 = optimizer5.minimize(loss5, global_step= global_step) 
     with tf.name_scope('optimizer6'):
-        optimizer6 = tf.train.AdamOptimizer(learning_rate= learning_rate)
+        optimizer6 = tf.train.AdamOptimizer(learning_rate= learning_rate, beta1=decay_rate_one, beta2=decay_rate_two)
         global_step = tf.Variable(0, name='global_step', trainable=False)
         train_op6 = optimizer6.minimize(loss6, global_step= global_step) 
     with tf.name_scope('optimizer7'):
-        optimizer7 = tf.train.AdamOptimizer(learning_rate= learning_rate)
+        optimizer7 = tf.train.AdamOptimizer(learning_rate= learning_rate, beta1=decay_rate_one, beta2=decay_rate_two)
         global_step = tf.Variable(0, name='global_step', trainable=False)
         train_op7 = optimizer7.minimize(loss7, global_step= global_step) 
 

@@ -17,8 +17,10 @@ img_w = 136
 img_h = 36
 num_labels = 7
 batch_size = 8
-epoch = 10
-learning_rate = 0.0001
+epoch = 50
+learning_rate = 0.005
+decay_rate_one= 0.9
+decay_rate_two=0.999
 image_holder = tf.placeholder(tf.float32,[batch_size,img_h,img_w,3])
 label_holder = tf.placeholder(tf.int32,[batch_size,7])
 keep_prob = tf.placeholder(tf.float32)
@@ -31,7 +33,7 @@ index = {"京": 0, "沪": 1, "津": 2, "渝": 3, "冀": 4, "晋": 5, "蒙": 6, "
          "6": 37, "7": 38, "8": 39, "9": 40, "A": 41, "B": 42, "C": 43, "D": 44, "E": 45, "F": 46, "G": 47, "H": 48,
          "J": 49, "K": 50, "L": 51, "M": 52, "N": 53, "P": 54, "Q": 55, "R": 56, "S": 57, "T": 58, "U": 59, "V": 60,
          "W": 61, "X": 62, "Y": 63, "Z": 64};
-def get_batch(i,images,labels):
+def get_batch (i, images, labels):
     batch_images = images[i*batch_size:(i + 1)*batch_size]
     batch_labels = labels[i*batch_size:(i + 1)*batch_size]
     return batch_images,batch_labels
@@ -40,7 +42,7 @@ train_logits1,train_logits2,train_logits3,train_logits4,train_logits5,train_logi
 
 train_loss1,train_loss2,train_loss3,train_loss4,train_loss5,train_loss6,train_loss7 = model.losses(train_logits1,train_logits2,train_logits3,train_logits4,train_logits5,train_logits6,train_logits7,label_holder)
  
-train_op1,train_op2,train_op3,train_op4,train_op5,train_op6,train_op7 = model.trainning(train_loss1,train_loss2,train_loss3,train_loss4,train_loss5,train_loss6,train_loss7,learning_rate)
+train_op1,train_op2,train_op3,train_op4,train_op5,train_op6,train_op7 = model.trainning(train_loss1,train_loss2,train_loss3,train_loss4,train_loss5,train_loss6,train_loss7,learning_rate,decay_rate_one,decay_rate_two)
 
 train_acc = model.evaluation(train_logits1,train_logits2,train_logits3,train_logits4,train_logits5,train_logits6,train_logits7,label_holder)
 input_image=tf.summary.image('input',image_holder)
@@ -86,13 +88,13 @@ for step in range(epoch):
         train_writer.add_summary(summary_str,step)
         tra_all_loss = tra_loss1+tra_loss2+tra_loss3+tra_loss4+tra_loss5+tra_loss6+tra_loss7
     duration = time.time()-start_time2
-    if step % 10 == 0:
-        sec_per_batch = float(duration)
-        print("time %d",duration)
-        print("loss %d",tra_all_loss)
-    if step % 1000 == 0 or (step+1) == epoch:
-        checkpoint_path = os.path.join(logs_train_dir,'model.ckpt')
+    print("duration", duration)
+
+    sec_per_batch = float(duration)
+    if (step + 1) % 10 == 0 or (step + 1) == epoch:
+        checkpoint_path = os.path.join(logs_train_dir, 'model.ckpt')
         saver = tf.train.Saver()
-        saver.save(sess,checkpoint_path,global_step=step)
+        saver.save(sess, checkpoint_path, global_step=step)
+        print("loss",tra_all_loss)
 sess.close()       
 print(time.time()-start_time1)
