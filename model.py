@@ -67,17 +67,17 @@ def inference (images,keep_prob):
         pre_activation = tf.nn.bias_add(conv,biases)
         conv5 = tf.nn.relu(pre_activation,name=scope.name)
 
-    # #conv6
-    # with tf.variable_scope('conv6') as scope:
-    #     weights = tf.get_variable('weights',shape=[3,3,128,128],dtype=tf.float32,initializer=tf.truncated_normal_initializer(stddev=0.1,dtype=tf.float32))
-    #     conv =tf.nn.conv2d(conv5,weights,strides=[1,1,1,1],padding='VALID')
-    #     biases = tf.get_variable('biases',shape=[128],dtype=tf.float32,initializer=tf.constant_initializer(0.1))
-    #     pre_activation = tf.nn.bias_add(conv,biases)
-    #     conv6 = tf.nn.relu(pre_activation,name=scope.name)
+    #conv6
+    with tf.variable_scope('conv6') as scope:
+        weights = tf.get_variable('weights',shape=[3,3,128,128],dtype=tf.float32,initializer=tf.truncated_normal_initializer(stddev=0.1,dtype=tf.float32))
+        conv =tf.nn.conv2d(conv5,weights,strides=[1,1,1,1],padding='VALID')
+        biases = tf.get_variable('biases',shape=[128],dtype=tf.float32,initializer=tf.constant_initializer(0.1))
+        pre_activation = tf.nn.bias_add(conv,biases)
+        conv6 = tf.nn.relu(pre_activation,name=scope.name)
 
     #pool3
     with tf.variable_scope('max_pool3') as scope:
-         pool3 = tf.nn.max_pool(conv5,ksize=[1,2,2,1],strides=[1,2,2,1],padding='VALID',name='pool3')
+         pool3 = tf.nn.max_pool(conv6,ksize=[1,2,2,1],strides=[1,2,2,1],padding='VALID',name='pool3')
     #%%
     #fc1_flatten
     with tf.variable_scope('fc1') as scope:

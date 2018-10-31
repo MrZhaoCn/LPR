@@ -22,11 +22,9 @@ def get_one_image(test):
     n = len(test)
     ind = np.random.randint(0,n)
     img_dir = test[ind]
-
-    image_show = Image.open(img_dir)
-    plt.imshow(image_show)
-    
     image = cv2.imread(img_dir)
+    cv2.imshow("imag", image)
+    cv2.waitKey(3000)
     # img = np.multiply(image,1/255.0)
     image = np.array([image])
     print(image.shape)
@@ -62,7 +60,6 @@ with tf.Session() as sess:
 
     pre1,pre2,pre3,pre4,pre5,pre6,pre7 = sess.run([logit1,logit2,logit3,logit4,logit5,logit6,logit7], feed_dict={x: image_array,keep_prob:1.0})
     prediction = np.reshape(np.array([pre1,pre2,pre3,pre4,pre5,pre6,pre7]),[-1,65])
-
     max_index = np.argmax(prediction,axis=1)
     print(max_index)
     line = ''
