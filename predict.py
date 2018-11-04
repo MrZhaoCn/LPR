@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import cv2
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import model
 from PIL import Image
 
@@ -44,7 +44,7 @@ image_array = get_one_image(test_image)
 
 
 logit1,logit2,logit3,logit4,logit5,logit6,logit7 = model.inference(x,keep_prob)
-logs_train_dir = './train_model/'
+logs_train_dir = './logs/'
 
 saver = tf.train.Saver()
 

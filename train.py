@@ -109,11 +109,13 @@ with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     train_writer = tf.summary.FileWriter(logs_train_dir, sess.graph)
 
+    global_step = 0
     ckpt = tf.train.get_checkpoint_state('./logs/')
     if ckpt and ckpt.model_checkpoint_path:
         saver.restore(sess, ckpt.model_checkpoint_path)
+        global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
 
-    for step in range(epoch):
+    for step in range(epoch - global_step):
         start_time2 = time.time()
         batch = int(len(train_datas) / batch_size)
         file_label = ""
@@ -125,7 +127,11 @@ with tf.Session() as sess:
                 [train_op1, train_op2, train_op3, train_op4, train_op5, train_op6, train_op7, train_loss1, train_loss2,
                  train_loss3, train_loss4, train_loss5, train_loss6, train_loss7, train_acc, summary_op], feed_dict)
             # accur1,accur2,accur3,accur4,accur5,accur6,accur7 = sess.run(accuracy1,accuracy2,accuracy3,accuracy4,accuracy5,accuracy6,accuracy7,feed_dict={label_holder: y_batch})
-            train_writer.add_summary(summary_str, step)
+            tempstep = step
+            if (global_step > 0):
+                tempstep = step + global_step + 1
+
+            train_writer.add_summary(summary_str, global_step = tempstep)
             mean_loss = (tra_loss1 + tra_loss2 + tra_loss3 + tra_loss4 + tra_loss5 + tra_loss6 + tra_loss7) / 7
             # mean_accur = (accur1 + accur2 + accur3 + accur4 + accur5 + accur6 + accur7) / 7
             duration = time.time()-start_time2
@@ -142,7 +148,7 @@ with tf.Session() as sess:
         file_label = file_label + "step:" + str(step) + "mean_loss:" + str(mean_loss)
         save_to_file(log_file_name, file_label)
         checkpoint_path = os.path.join(logs_train_dir, 'model.ckpt')
-        saver.save(sess, checkpoint_path, global_step=step)
+        saver.save(sess, checkpoint_path, global_step = tempstep)
         # if (step + 1) % 10 == 0 or (step + 1) == epoch:
 
     print(time.time()-start_time1)
